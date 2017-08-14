@@ -126,8 +126,11 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    // TODO (7): Prepare the MediaSource using DefaultDataSourceFactory and DefaultExtractorsFactory, as well as the Sample URI you passed in.
-    // TODO (8): Prepare the ExoPlayer with the MediaSource, start playing the sample and set the SimpleExoPlayer to the SimpleExoPlayerView.
+    private void releasePlayer() {
+        mExoPlayer.stop();
+        mExoPlayer.release();
+        mExoPlayer = null;
+    }
 
 
     /**
@@ -197,7 +200,7 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                // TODO (9): Stop the playback when you go to the next question.
+                mExoPlayer.stop();
                 Intent nextQuestionIntent = new Intent(QuizActivity.this, QuizActivity.class);
                 nextQuestionIntent.putExtra(REMAINING_SONGS_KEY, mRemainingSampleIDs);
                 finish();
@@ -211,10 +214,10 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
      * Disables the buttons and changes the background colors to show the correct answer.
      */
     private void showCorrectAnswer() {
+        mPlayerView.setDefaultArtwork(Sample.getComposerArtBySampleID(this, mAnswerSampleID));
         for (int i = 0; i < mQuestionSampleIDs.size(); i++) {
             int buttonSampleID = mQuestionSampleIDs.get(i);
 
-            // TODO (10): Change the default artwork in the SimpleExoPlayerView to show the picture of the composer, when the user has answered the question.
             mButtons[i].setEnabled(false);
             if (buttonSampleID == mAnswerSampleID) {
                 mButtons[i].getBackground().setColorFilter(ContextCompat.getColor
@@ -231,5 +234,9 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    // TODO (11): Override onDestroy() to stop and release the player when the Activity is destroyed.
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        releasePlayer();
+    }
 }
